@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:game_2048/utils.dart';
+import 'package:provider/provider.dart';
 
 import 'colors.dart';
 
@@ -17,7 +18,7 @@ class BoardWidget extends StatefulWidget{
 }
 class BoardWidgetState extends State<BoardWidget> {
   int count = 0;
-
+  int score = 0;
 
   BoardWidgetState(this._numRows, this._numColumns){
     initTileList();
@@ -27,9 +28,6 @@ class BoardWidgetState extends State<BoardWidget> {
   int _numColumns;
   List<Pair<int, int>> _emptyTilePositions;
   List<List<Tile>> _tiles;
-
-  int score = 0;
-
   void initTileList() {
     this._tiles = List<List<Tile>>();
     this._emptyTilePositions = List<Pair<int, int>>();
@@ -58,9 +56,12 @@ class BoardWidgetState extends State<BoardWidget> {
     t.value = random.nextInt(10) == 0 ? 4 : 2;
     return true;
   }
-  bool merge(Tile a, Tile b) {
+  bool merge(BuildContext context, Tile a, Tile b) {
+    ScoreNotifier scoreNotifier = Provider.of<ScoreNotifier>(context);
     if (a.value == b.value) {
       a.value += b.value;
+      this.score += a.value;
+      scoreNotifier.score = this.score;
       b.value = 0;
       return true;
     }
@@ -71,7 +72,7 @@ class BoardWidgetState extends State<BoardWidget> {
     a.swapValue(b);
   }
 
-  void move(Directions d) {
+  void move(BuildContext context, Directions d) {
     int moves = 0;
     if (d == Directions.UP) {
       for (int row = 1; row < this._numRows; row++) {
@@ -94,7 +95,7 @@ class BoardWidgetState extends State<BoardWidget> {
               if (prevTile == currTile) {
                 this._emptyTilePositions.add(
                     Pair(currTile.row, currTile.column));
-                merge(prevTile, currTile);
+                merge(context, prevTile, currTile);
                 moves++;
               }
             }
@@ -122,7 +123,7 @@ class BoardWidgetState extends State<BoardWidget> {
               if (nextTile == currTile) {
                 this._emptyTilePositions.add(
                     Pair(currTile.row, currTile.column));
-                merge(nextTile, currTile);
+                merge(context, nextTile, currTile);
                 moves++;
               }
             }
@@ -150,7 +151,7 @@ class BoardWidgetState extends State<BoardWidget> {
               if (nextTile == currTile) {
                 this._emptyTilePositions.add(
                     Pair(currTile.row, currTile.column));
-                merge(nextTile, currTile);
+                merge(context, nextTile, currTile);
                 moves++;
               }
             }
@@ -178,7 +179,7 @@ class BoardWidgetState extends State<BoardWidget> {
               if (prevTile == currTile) {
                 this._emptyTilePositions.add(
                     Pair(currTile.row, currTile.column));
-                merge(prevTile, currTile);
+                merge(context, prevTile, currTile);
                 moves++;
               }
             }
@@ -254,15 +255,15 @@ class BoardWidgetState extends State<BoardWidget> {
         initialY = 0.0;
         if(distanceX.abs() > distanceY.abs()){
           if(distanceX > 0){
-            move(Directions.RIGHT);
+            move(context, Directions.RIGHT);
           }else if(distanceX < 0){
-            move(Directions.LEFT);
+            move(context, Directions.LEFT);
           }
         }else {
           if(distanceY > 0){
-            move(Directions.DOWN);
+            move(context, Directions.DOWN);
           }else if(distanceY < 0){
-            move(Directions.UP);
+            move(context, Directions.UP);
           }
         }
       },

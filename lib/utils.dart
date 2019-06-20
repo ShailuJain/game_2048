@@ -4,7 +4,13 @@ enum Directions{
   UP, RIGHT, DOWN, LEFT
 }
 
-class ScoreNotification extends Notification{
-  int score;
-  ScoreNotification(this.score);
+class ScoreNotifier extends ChangeNotifier{
+ int _score = 0;
+
+ int get score => _score;
+
+ set score(int value) {
+   _score = value;
+   notifyListeners();
+ }
 }

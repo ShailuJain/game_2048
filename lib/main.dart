@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:game_2048/utils.dart';
+import 'package:provider/provider.dart';
 import 'homepage.dart';
 
 void main() => runApp(MyApp());
@@ -17,42 +18,45 @@ class MyApp extends StatelessWidget {
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(
-          color: Color(0xfffaf8ef),
-        ),
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child: ScoreBoardWidget(),
-            ),
-            Expanded(
-              flex: 2,
-              child: BoardWidget(4, 4),
-            ),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  RaisedButton(
-                    color: Color(0xff8f7a66),
-                    child: Text(
-                      'New Game',
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    onPressed: null,
-                  )
-                ],
+    return ChangeNotifierProvider(
+      builder: (context) => ScoreNotifier(),
+      child: Scaffold(
+        body: Container(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          decoration: BoxDecoration(
+            color: Color(0xfffaf8ef),
+          ),
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                child: ScoreBoardWidget(),
               ),
-            ),
-          ],
+              Expanded(
+                flex: 2,
+                child: BoardWidget(4, 4),
+              ),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    RaisedButton(
+                      color: Color(0xff8f7a66),
+                      child: Text(
+                        'New Game',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onPressed: null,
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -67,7 +71,6 @@ class ScoreBoardWidget extends StatefulWidget {
 }
 
 class ScoreBoardWidgetState extends State<ScoreBoardWidget> {
-  int score = 0;
   final textStyle1 = TextStyle(
     fontSize: 20,
     color: Colors.white,
@@ -81,6 +84,7 @@ class ScoreBoardWidgetState extends State<ScoreBoardWidget> {
 
   @override
   Widget build(BuildContext context) {
+    ScoreNotifier scoreNotifier = Provider.of<ScoreNotifier>(context);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -105,26 +109,19 @@ class ScoreBoardWidgetState extends State<ScoreBoardWidget> {
                   decoration: BoxDecoration(
                     color: Color(0xffbbada0),
                   ),
-                  child: NotificationListener<ScoreNotification>(
-                    onNotification: (ScoreNotification sn){
-                      setState(() {
-                        this.score = sn.score;
-                      });
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Text(
-                          'Score',
-                          style: this.textStyle1,
-                        ),
-                        Text(
-                          '${this.score}',
-                          style: this.textStyle2,
-                        ),
-                      ],
-                    ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        'Score',
+                        style: this.textStyle1,
+                      ),
+                      Text(
+                        '${scoreNotifier.score}',
+                        style: this.textStyle2,
+                      ),
+                    ],
                   ),
                 ),
               ),
