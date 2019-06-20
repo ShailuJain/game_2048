@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game_2048/utils.dart';
 import 'homepage.dart';
 
 void main() => runApp(MyApp());
@@ -33,7 +34,23 @@ class HomePage extends StatelessWidget {
               child: BoardWidget(4, 4),
             ),
             Expanded(
-              child: Row(),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  RaisedButton(
+                    color: Color(0xff8f7a66),
+                    child: Text(
+                      'New Game',
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    onPressed: null,
+                  )
+                ],
+              ),
             ),
           ],
         ),
@@ -50,6 +67,7 @@ class ScoreBoardWidget extends StatefulWidget {
 }
 
 class ScoreBoardWidgetState extends State<ScoreBoardWidget> {
+  int score = 0;
   final textStyle1 = TextStyle(
     fontSize: 20,
     color: Colors.white,
@@ -87,42 +105,27 @@ class ScoreBoardWidgetState extends State<ScoreBoardWidget> {
                   decoration: BoxDecoration(
                     color: Color(0xffbbada0),
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        'Score',
-                        style: this.textStyle1,
-                      ),
-                      Text(
-                        '0',
-                        style: this.textStyle2,
-                      ),
-                    ],
+                  child: NotificationListener<ScoreNotification>(
+                    onNotification: (ScoreNotification sn){
+                      setState(() {
+                        this.score = sn.score;
+                      });
+                    },
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Text(
+                          'Score',
+                          style: this.textStyle1,
+                        ),
+                        Text(
+                          '${this.score}',
+                          style: this.textStyle2,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: Container(
-                margin: EdgeInsets.only(left: 10, right: 10),
-                decoration: BoxDecoration(
-                  color: Color(0xffbbada0),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      'Best',
-                      style: this.textStyle1,
-                    ),
-                    Text(
-                      '0',
-                      style: this.textStyle2,
-                    ),
-                  ],
                 ),
               ),
             ),

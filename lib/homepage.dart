@@ -58,7 +58,6 @@ class BoardWidgetState extends State<BoardWidget> {
     t.value = random.nextInt(10) == 0 ? 4 : 2;
     return true;
   }
-
   bool merge(Tile a, Tile b) {
     if (a.value == b.value) {
       a.value += b.value;
@@ -68,38 +67,138 @@ class BoardWidgetState extends State<BoardWidget> {
     return false;
   }
 
-  void swap(Tile a, Tile b) {
-    a.swap(b);
+  void swapValue(Tile a, Tile b) {
+    a.swapValue(b);
   }
 
   void move(Directions d) {
+    int moves = 0;
     if (d == Directions.UP) {
       for (int row = 1; row < this._numRows; row++) {
         for(int col = 0; col < this._numColumns; col++){
           Tile currTile = this._tiles[row][col];
           Tile prevTile = this._tiles[row - 1][col];
           if(!currTile.isEmpty()){
-            if(prevTile.isEmpty()){
+            while(prevTile.isEmpty()){
               this._emptyTilePositions.remove(Pair(prevTile.row, prevTile.column));
               this._emptyTilePositions.add(Pair(currTile.row, currTile.column));
-              swap(prevTile, currTile);
-            }else if(prevTile == currTile){
-              this._emptyTilePositions.add(Pair(currTile.row, currTile.column));
-              merge(prevTile, currTile);
+              swapValue(prevTile, currTile);
+              if(prevTile.row == 0)
+                break;
+              currTile = this._tiles[prevTile.row][prevTile.column];
+              prevTile = this._tiles[prevTile.row - 1][prevTile.column];
+              moves++;
+            }
+            if(currTile.row != 0) {
+              prevTile = this._tiles[currTile.row - 1][currTile.column];
+              if (prevTile == currTile) {
+                this._emptyTilePositions.add(
+                    Pair(currTile.row, currTile.column));
+                merge(prevTile, currTile);
+                moves++;
+              }
             }
           }
         }
       }
     } else if (d == Directions.RIGHT) {
+      for (int row = 0; row < this._numRows; row++) {
+        for (int col = this._numColumns - 2; col >= 0; col--) {
+          Tile currTile = this._tiles[row][col];
+          Tile nextTile = this._tiles[row][col + 1];
+          if (!currTile.isEmpty()) {
+            while (nextTile.isEmpty()) {
+              this._emptyTilePositions.remove(Pair(nextTile.row, nextTile.column));
+              this._emptyTilePositions.add(Pair(currTile.row, currTile.column));
+              swapValue(nextTile, currTile);
+              if (nextTile.column == this._numColumns - 1)
+                break;
+              currTile = this._tiles[nextTile.row][nextTile.column];
+              nextTile = this._tiles[nextTile.row][nextTile.column + 1];
+              moves++;
+            }
+            if (currTile.column != this._numColumns - 1) {
+              nextTile = this._tiles[currTile.row][currTile.column + 1];
+              if (nextTile == currTile) {
+                this._emptyTilePositions.add(
+                    Pair(currTile.row, currTile.column));
+                merge(nextTile, currTile);
+                moves++;
+              }
+            }
+          }
+        }
+      }
     } else if (d == Directions.DOWN) {
-    } else if (d == Directions.LEFT) {}
+      for (int row = this._numRows - 2; row >= 0; row--) {
+        for(int col = 0; col < this._numColumns; col++){
+          Tile currTile = this._tiles[row][col];
+          Tile nextTile = this._tiles[row + 1][col];
+          if(!currTile.isEmpty()){
+            while(nextTile.isEmpty()){
+              this._emptyTilePositions.remove(Pair(nextTile.row, nextTile.column));
+              this._emptyTilePositions.add(Pair(currTile.row, currTile.column));
+              swapValue(nextTile, currTile);
+              if(nextTile.row == this._numRows - 1)
+                break;
+              currTile = this._tiles[nextTile.row][nextTile.column];
+              nextTile = this._tiles[nextTile.row + 1][nextTile.column];
+              moves++;
+            }
+            if(currTile.row != 0) {
+              nextTile = this._tiles[currTile.row + 1][currTile.column];
+              if (nextTile == currTile) {
+                this._emptyTilePositions.add(
+                    Pair(currTile.row, currTile.column));
+                merge(nextTile, currTile);
+                moves++;
+              }
+            }
+          }
+        }
+      }
+    } else if (d == Directions.LEFT) {
+      for (int row = 0; row < this._numRows; row++) {
+        for(int col = 1; col < this._numColumns; col++){
+          Tile currTile = this._tiles[row][col];
+          Tile prevTile = this._tiles[row][col - 1];
+          if(!currTile.isEmpty()){
+            while(prevTile.isEmpty()){
+              this._emptyTilePositions.remove(Pair(prevTile.row, prevTile.column));
+              this._emptyTilePositions.add(Pair(currTile.row, currTile.column));
+              swapValue(prevTile, currTile);
+              if(prevTile.column == 0)
+                break;
+              currTile = this._tiles[prevTile.row][prevTile.column];
+              prevTile = this._tiles[prevTile.row][prevTile.column - 1];
+              moves++;
+            }
+            if(currTile.column != 0) {
+              prevTile = this._tiles[currTile.row][currTile.column - 1];
+              if (prevTile == currTile) {
+                this._emptyTilePositions.add(
+                    Pair(currTile.row, currTile.column));
+                merge(prevTile, currTile);
+                moves++;
+              }
+            }
+          }
+        }
+      }
+    }
+    setState(() {
+      if(moves > 0)
+        generateRandomTile();
+    });
   }
 
   List<Widget> initWidgets(h,w) {
     final List<Widget> _widgets = List<Widget>();
+//    print("Tiles");
     for (int i = 0; i < this._numRows; i++) {
       List<Widget> tiles = List<Widget>();
       for (int j = 0; j < this._numColumns; j++) {
+//        print(_tiles[i][j]);
         tiles.add(
           Expanded(
             child: Stack(
@@ -129,26 +228,57 @@ class BoardWidgetState extends State<BoardWidget> {
 
   @override
   Widget build(BuildContext context) {
+    var initialX;
+    var initialY;
+    var distanceX;
+    var distanceY;
     count++;
-//    if(count == 1){
+    if(count == 1){
       generateRandomTile();
       generateRandomTile();
       setState(() {
-        print(count);
+
       });
-//    }
-    return Align(
-      alignment: Alignment.center,
-      child: Opacity(
-        opacity: 0.5,
-        child: Container(
-          margin: EdgeInsets.only(left: 10, right: 10),
-          decoration: BoxDecoration(
-            color: Color(0xffbbada0),
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          child: Column(
-            children: this.initWidgets(MediaQuery.of(context).size.height, MediaQuery.of(context).size.width),
+    }
+    return GestureDetector(
+      onPanStart: (DragStartDetails details){
+        initialX = details.globalPosition.dx;
+        initialY = details.globalPosition.dy;
+      },
+      onPanUpdate: (DragUpdateDetails details){
+        distanceX = details.globalPosition.dx - initialX;
+        distanceY = details.globalPosition.dy - initialY;
+      },
+      onPanEnd: (DragEndDetails details){
+        initialX = 0.0;
+        initialY = 0.0;
+        if(distanceX.abs() > distanceY.abs()){
+          if(distanceX > 0){
+            move(Directions.RIGHT);
+          }else if(distanceX < 0){
+            move(Directions.LEFT);
+          }
+        }else {
+          if(distanceY > 0){
+            move(Directions.DOWN);
+          }else if(distanceY < 0){
+            move(Directions.UP);
+          }
+        }
+      },
+      child: Align(
+        alignment: Alignment.center,
+        child: Opacity(
+          opacity: 0.5,
+          child: Container(
+            margin: EdgeInsets.only(left: 10, right: 10),
+            decoration: BoxDecoration(
+              color: Color(0xffbbada0),
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+            ),
+            child: Column(
+              children: this.initWidgets(MediaQuery.of(context).size.height, MediaQuery.of(context).size.width),
+            ),
           ),
         ),
       ),
@@ -179,6 +309,7 @@ class TileWidget extends StatelessWidget {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 30,
+            color: this.value == 8 || this.value == 16 || this.value == 32 || this.value == 64 ? Colors.white : Colors.black ,
           ),
         ),
       ),
@@ -197,25 +328,28 @@ class Tile{
     _value = value;
   }
 
-  Tile(this.row, this.column, {int value = 0}){
-    this.value = value;
-  }
+  Tile(this.row, this.column);
 
   bool isEmpty() {
     return this.value == 0;
   }
 
-  void swap(Tile b) {
+  @override
+  String toString() {
+    return "Current tile row = ${this.row} column = ${this.column} value = ${this.value}";
+  }
+
+  void swapValue(Tile b) {
     int temp;
     //row swapping
-    temp = this.row;
-    this.row = b.row;
-    b.row = temp;
-
-    //column swapping
-    temp = this.column;
-    this.column = b.column;
-    b.column = temp;
+//    temp = this.row;
+//    this.row = b.row;
+//    b.row = temp;
+//
+//    //column swapping
+//    temp = this.column;
+//    this.column = b.column;
+//    b.column = temp;
 
     //value swapping
     temp = this.value;
